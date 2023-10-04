@@ -1,0 +1,75 @@
+//Colors
+@base-color: #312e2b;
+@sub-color: #262421;
+@button-color: #e39739;
+@text-color: #ffffff;
+
+.clicked(@color) {
+    background-color: mix(@color, #000000, 75%);
+}
+
+.highlight(@color) {
+    background-color: mix(@color, #ffffff, 75%);
+}
+
+body {
+    background-color: @base-color;
+}
+
+.navbar, .navbar-brand {
+    background-color: @sub-color;
+    padding-left: 10px;
+    color: @text-color;
+    &:hover {
+        color: @text-color;
+    }
+}
+
+.btn {
+    background-color: @button-color;
+    font-size: larger;
+    color: @text-color;
+    &:hover {
+        .highlight(@button-color);
+        color: @text-color;
+    }
+}
+
+.nav-link {
+    color: @text-color;
+    &:hover, &:visited {
+        color: @text-color;
+    }
+}
+
+.vr, #ProfileIcon {
+    margin-right: 20px;
+}
+
+.home-center {
+    display: flex;
+    flex-direction: row;
+    .home-column {
+        flex-direction: column;
+    }
+}
+
+.card {
+    background-color: @sub-color;
+}
+
+.card-body {
+    padding: 0;
+}
+
+.card-button {
+    background-color: @sub-color;
+    &:hover {
+        background-color: @sub-color;
+        color: @text-color;
+    }
+}
+
+
+
+
