@@ -5,7 +5,7 @@
 @text-color: #ffffff;
 
 .clicked(@color) {
-    background-color: mix(@color, #000000, 75%);
+    background-color: mix(@color, #000000, 85%);
 }
 
 .highlight(@color) {
@@ -33,6 +33,11 @@ body {
         .highlight(@button-color);
         color: @text-color;
     }
+
+    &:first-child:active {
+        .clicked(@button-color);
+        color: @text-color;
+    }
 }
 
 .nav-link {
@@ -46,26 +51,99 @@ body {
     margin-right: 20px;
 }
 
+#Profile-Text {
+    @media only screen and (max-width: 400px) {
+        font-size: 0px;
+    }
+}
+
 .home-center {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    column-gap: 15px;
+    row-gap: 15px;
+    margin-top: 50px;
+    @media only screen and (max-width: 700px) {
+        margin-top: 25px;
+    }
     .home-column {
+        grid-column: 1;
+        grid-row: 1;
+        display: flex;
         flex-direction: column;
+        row-gap: 15px;
+        column-gap: 15px;
+        width: 200px;
+        @media only screen and (max-width: 700px) {
+            grid-column: auto;
+            display: grid;
+
+            #CardOne {
+                grid-column: 1;
+                width: 167.5px;
+            }
+
+            #CardTwo {
+                grid-column: 2;
+                width: 167.5px;
+            }
+        }
+        
+        @media only screen and (max-width: 350px) {
+            grid-column: auto;
+            display: grid;
+
+            #CardOne {
+                grid-column: 1;
+                width: 117.5px;
+            }
+
+            #CardTwo {
+                grid-column: 2;
+                width: 117.5px;
+            }
+        }
+    }
+
+    #Grid-Right {
+        grid-column: 2/3;
+        width: 450px;
+        .card-body {
+            height: 100px;
+        }
+        @media only screen and (max-width: 700px) {
+            grid-column: 1/2;
+            grid-row: 2/3;
+            width: 350px;
+        }
+
+        @media only screen and (max-width: 350px) {
+            grid-column: 1/2;
+            grid-row: 2/3;
+            width: 250px;
+        }
     }
 }
 
 .card {
     background-color: @sub-color;
+    border: #000000;
+    border-radius: 20px;
 }
 
 .card-body {
     padding: 0;
+    margin: 0;
 }
 
 .card-button {
     background-color: @sub-color;
     &:hover {
         background-color: @sub-color;
+        color: @text-color;
+    }
+
+    &:first-child:active {
+        .clicked(@sub-color);
         color: @text-color;
     }
 }
