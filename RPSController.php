@@ -43,6 +43,9 @@ class RPSController {
             case "global":
                 $this->showGlobalStats();
                 break;
+            case "profile":
+                $this->showProfile();
+                break;
             default:
                 $this->showHomePage();
                 break;
@@ -59,6 +62,46 @@ class RPSController {
 
     public function showGlobalStats() {
         include("./globalstats.php");
+    }
+
+    public function showProfile() {
+        if(!isset($_SESSION['signed_in'])) {
+            $this->showHomePage();
+            return;
+        }
+        $username = $_SESSION["username"];
+        $res = $this->db->query("select * from users where username = $1;", $username);
+        $numWin = $res[0]["numwin"];
+        $numTie = $res[0]["numtie"];
+        $numLoss = $res[0]["numloss"];
+        $numRock = $res[0]["numrock"];
+        $numRockWin = $res[0]["numrockwin"];
+        $numRockTie = $res[0]["numrocktie"];
+        $numRockLoss = $res[0]["numrockloss"];
+        $numPaper = $res[0]["numpaper"];
+        $numPaperWin = $res[0]["numpaperwin"];
+        $numPaperTie = $res[0]["numpapertie"];
+        $numPaperLoss = $res[0]["numpaperloss"];
+        $numScissors = $res[0]["numscissors"];
+        $numScissorsWin = $res[0]["numscissorswin"];
+        $numScissorsTie = $res[0]["numscissorstie"];
+        $numScissorsLoss = $res[0]["numscissorsloss"];
+        list($total, $pWin, $pTie, $pLoss) = $this->percentages($numWin, $numTie, $numLoss);
+        list($totalRPS, $pRock, $pPaper, $pScissors) = $this->percentages($numRock, $numPaper, $numScissors);
+        list($totalRock, $pRockWin, $pRockTie, $pRockLoss) = $this->percentages($numRockWin, $numRockTie, $numRockLoss);
+        list($totalPaper, $pPaperWin, $pPaperTie, $pPaperLoss) = $this->percentages($numPaperWin, $numPaperTie, $numPaperLoss);
+        list($totalScissors, $pScissorsWin, $pScissorsTie, $pScissorsLoss) = $this->percentages($numScissorsWin, $numScissorsTie, $numScissorsLoss);
+        include("./profile.php");
+    }
+
+    public function percentages($wins, $ties, $losses) {
+        $total = $wins + $ties + $losses;
+        if($total != 0) {
+            return array($total, round($wins / $total * 100), round($ties / $total * 100), round($losses / $total * 100));
+        }
+        else {
+            return array(0, 0, 0, 0);
+        }
     }
 
     public function playGame() {

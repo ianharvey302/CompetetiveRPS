@@ -11,7 +11,7 @@
     <ul class="nav navbar-nav ms-auto">
         <li class="nav-item">
             <!--For the account pfp-->
-            <a class="nav-link" href="#"  id="ProfileIcon">
+            <a class="nav-link" href="<?php if(isset($_SESSION['username'])) {echo '?command=profile';} else {echo '?command=signup';}?>"  id="ProfileIcon">
                 <span id="Profile-Text">
                     <?php
                     if (isset($_SESSION['username'])) {
