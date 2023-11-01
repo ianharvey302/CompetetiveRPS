@@ -24,7 +24,7 @@
             <div class="home-center justify-content-center">
                 <div id="Grid-Right" class="card position-relative">
                     <div class="card-header text-center">
-                        Login
+                        Sign Up
                     </div>
                     <div class="card-body">
                         <div id="Login-Form" class="container">
