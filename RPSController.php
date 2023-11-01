@@ -51,18 +51,12 @@ class RPSController {
     }
 
     public function login() {
-
-        if(isset($_POST["fullname"])) {
-            $_SESSION["username"] = $_POST["password"];
-        }
-
-        if(isset($_POST["email"])) {
-            $_SESSION["email"] = $_POST["email"];
+        if(isset($_POST["username"])) {
+            $_SESSION["username"] = $_POST["username"];
         }
 
         $_SESSION["signed_in"] = true;
-        include("./homepage.php");
-
+        $this->showHomePage();
     }
 
     public function createUser() {
@@ -70,18 +64,14 @@ class RPSController {
             $_SESSION["username"] = $_POST["password"];
         }
 
-        if(isset($_POST["email"])) {
-            $_SESSION["email"] = $_POST["email"];
-        }
-
         $_SESSION["signed_in"] = true;
         include("./homepage.php");
-
     }
 
      public function logout() {
         session_destroy();
         session_start();
+        $this->showHomePage();
     }
 
 }

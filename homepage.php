@@ -12,8 +12,6 @@
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
         <link rel="stylesheet/less" type="text/css" href="styles/main.less">
-
-        <link rel="stylesheet" href="styles/main.css">
          
         <title>Competitive RPS</title>
     </head>
@@ -33,7 +31,16 @@
                 <li class="nav-item">
                     <!--For the account pfp-->
                     <a class="nav-link" href="#"  id="ProfileIcon">
-                        <span id="Profile-Text">Profile</span>
+                        <span id="Profile-Text">
+                            <?php
+                            if (isset($_SESSION['username'])) {
+                                echo $_SESSION["username"];
+                            }
+                            else {
+                                echo "Profile";
+                            }
+                            ?>
+                        </span>
                         <img class="rounded"  src="images/DefaultProfile.png" alt="The user's profile picture">
                     </a>
                 </li>
@@ -61,43 +68,45 @@
                 </div>
                 <div id="Grid-Right" class="card position-relative">
                     <?php
-                    if (!isset($_SESSION['signed_in'])) {
-                        echo '
-                        <div class="card-header text-center">
-                        Login
-                        </div>
-                        <div class="card-body">
-                            <div id="Login-Form" class="container">
-                                <form class="flexform" action="?command=login" method="post">
-                                    <div class="form-group">
-                                        <label for="username">Username</label>
-                                        <input type="text" class="form-control" id="username" placeholder="Enter your username" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="password">Password</label>
-                                        <input type="password" class="form-control" id="password" aria-describedby="passwordHelp" placeholder="Enter your password">
-                                        <small id="passwordHelp" class="form-text">*Not required if not set.</small>
-                                    </div>
-                                    <button type="submit" class="btn btn-lg">Login</button>
+                        if (!isset($_SESSION['signed_in'])) {
+                            echo '
+                            <div class="card-header text-center">
+                            Login
+                            </div>
+                            <div class="card-body">
+                                <div id="Login-Form" class="container">
+                                    <form class="flexform" action="?command=login" method="post">
+                                        <div class="form-group">
+                                            <label for="username">Username</label>
+                                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="password">Password</label>
+                                            <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp" placeholder="Enter your password">
+                                            <small id="passwordHelp" class="form-text">*Not required if not set.</small>
+                                        </div>
+                                        <button type="submit" class="btn btn-lg">Login</button>
+                                    </form> 
                                     <span>~ OR ~</span>
-                                    <button type="submit" formaction="?command=signup" class="btn btn-lg">Sign Up</button>
-                                </form> 
+                                    <button style="width: 100%;" type="submit" formaction="?command=signup" class="btn btn-lg">Sign Up</button>
+                                </div>
                             </div>
-                        </div>
-                        ';
-                    }
-                    
-                    else echo '
-                        <div class="card-header text-center">
-                            Welcome ' . $_SESSION["username"] . '
-                        </div>
-                        <div class="card-body">
-                            <div id="Profile-Buttons" class="container">
-                                <a href="?command=profile" class="btn btn-lg">View Profile</button>
-                                <a href="?command=logout" class="btn btn-lg">Logout</button>
+                            ';
+                        }
+                        
+                        else {
+                            echo '
+                            <div class="card-header text-center">
+                                Welcome ' . $_SESSION["username"] . '!
                             </div>
-                        </div>
-                    ';
+                            <div class="card-body">
+                                <div id="Profile-Buttons" class="container">
+                                    <a style="width: 100%" href="?command=profile" class="btn btn-lg">View Profile</a>
+                                    <a style="width: 100%" href="?command=logout" class="btn btn-lg">Logout</a>
+                                </div>
+                            </div>
+                            ';
+                        }
                     ?>
 
                 </div>
