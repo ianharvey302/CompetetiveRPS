@@ -17,35 +17,9 @@
     </head>
     <body>
         <!--Navbar stuff-->
-        <nav class="navbar navbar-expand">
-            <a class="navbar-brand" href="?command=home">
-                Competitive RPS
-            </a>
-            <ul class="navbar-nav me-auto">
-                <li class="vr"></li>
-                <li class="nav-item">
-                    <a href="?command=play" class="btn btn-lg">Play!</a>
-                </li>
-            </ul>
-            <ul class="nav navbar-nav ms-auto">
-                <li class="nav-item">
-                    <!--For the account pfp-->
-                    <a class="nav-link" href="#"  id="ProfileIcon">
-                        <span id="Profile-Text">
-                            <?php
-                            if (isset($_SESSION['username'])) {
-                                echo $_SESSION["username"];
-                            }
-                            else {
-                                echo "Profile";
-                            }
-                            ?>
-                        </span>
-                        <img class="rounded"  src="images/DefaultProfile.png" alt="The user's profile picture">
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <?php
+            include("./navbar.php");
+        ?>
         <div class="main-container">
             <div class="home-center justify-content-center">
                 <div id="Grid-Left" class="home-column">
@@ -88,7 +62,7 @@
                                         <button type="submit" class="btn btn-lg">Login</button>
                                     </form> 
                                     <span>~ OR ~</span>
-                                    <button style="width: 100%;" type="submit" formaction="?command=signup" class="btn btn-lg">Sign Up</button>
+                                    <a style="width: 100%;" href="?command=signup" class="btn btn-lg">Sign Up</a>
                                 </div>
                             </div>
                             ';
@@ -110,6 +84,8 @@
                     ?>
 
                 </div>
+                <br>
+                <?=$message?>
             </div>
 
         </div>

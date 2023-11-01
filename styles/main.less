@@ -8,6 +8,7 @@
 @scissor-color: #916f5e;
 @win-color: #0a8a0a;
 @loss-color: #ef0000;
+@alert-color: #dc3545;
 
 
 .clicked(@color) {
@@ -290,4 +291,8 @@ label {
     background-color: @loss-color;
 }
 
-
+.alert-danger {
+    background-color: @alert-color;
+    border-color: @alert-color;
+    color: @text-color;
+}
