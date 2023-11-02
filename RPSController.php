@@ -141,7 +141,7 @@ class RPSController {
     public function percentages($wins, $ties, $losses) {
         $total = $wins + $ties + $losses;
         if($total != 0) {
-            return array($total, round($wins / $total * 100), round($ties / $total * 100), round($losses / $total * 100));
+            return array($total, round($wins / $total * 100, 2), round($ties / $total * 100, 2), round($losses / $total * 100, 2));
         }
         else {
             return array(0, 0, 0, 0);
