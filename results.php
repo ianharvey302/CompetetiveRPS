@@ -12,7 +12,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
         <link rel="stylesheet/less" type="text/css" href="styles/main.less">
          
-        <title>Ongoing Game - Competitive RPS</title>
+        <title>Match Results - Competitive RPS</title>
     </head>
     <body>
         <!--Navbar stuff-->
@@ -23,22 +23,13 @@
         <div class="main-container">
             <div class="centered-container-flex">
                 <div class="match-text">
-                    <h1>Opponent: <strong>Guest</strong></h1>
-                    <h5><strong>Guest</strong> is selecting move</h5>
-                    <h3>Select Your Move (10s left):</h3>
+                    <h1>Match Results (Opponent: <strong>Guest</strong>)</h1>
                 </div>
-                <form class="flexform centered-container-flex" action="?command=play" method="post">
-                    <div class="match-moves" role="group" aria-label="Moves">
-                        <button type="submit" name="game_move" value="rock" class="btn move-btn rock-btn">ROCK</button>
-                        <button type="submit" name="game_move" value="paper" class="btn move-btn paper-btn">PAPER</button>
-                        <button type="submit" name="game_move" value="scissors" class="btn move-btn scissor-btn">SCISSORS</button>
-                    </div>
-                    <div class="match-submit">
-                        <button type="button" class="btn btn-lg lock-btn">LOCK IN</button>
-                        <button type="submit" name="game_move" value="forfeit" class="nav-link forfeit-btn">Forfeit</a>
-                    </div>
-                </form>     
-
+                <h1 style="font-size: 10vh;">You <?php echo $_SESSION["match_result"]?>!</h1>
+                <div style="margin-top: 20%;">
+                <a href="?command=play" class="btn btn-lg">Play Again</a>
+                <a href="?command=home" class="btn btn-lg">Back to Home</a>
+                </div>
             </div>
         </div>
 

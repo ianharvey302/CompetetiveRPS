@@ -94,6 +94,11 @@
                     ?>
                 </div>
             </div>
+
+            <div class="centered-container-flex">
+                <a href="?command=global" class="btn btn-lg" style="margin-top: 3vh;">Global Stats</a>
+                <a href="?command=dump_stats" class="btn btn-lg" style="margin-top: 3vh;">JSON of your Stats</a>
+            </div>
         </div>
 
         <!--Bootstrap and Less imports-->
