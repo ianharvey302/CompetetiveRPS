@@ -17,7 +17,7 @@
     <body>
         <!--Navbar stuff-->
         <?php
-            include("./navbar.php");
+            include("navbar.php");
         ?>
 
         <div class="main-container">
@@ -25,7 +25,7 @@
                 <div class="match-text">
                     <h1>Match Results (Opponent: <strong>Guest</strong>)</h1>
                 </div>
-                <h1 style="font-size: 10vh;">You <?php echo $_SESSION["match_result"]?>!</h1>
+                <h1 style="font-size: 10vh;">You <?php echo $_SESSION["displayed_match_result"]?>!</h1>
                 <div style="margin-top: 20%;">
                 <a href="?command=play" class="btn btn-lg">Play Again</a>
                 <a href="?command=home" class="btn btn-lg">Back to Home</a>

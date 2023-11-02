@@ -7,7 +7,7 @@ class RPSController {
     private $input = [];
 
     private $PATHSTRING = "./"; //use for local development
-    // private $PATHSTRING = "/path/to/secret/"; //use for server
+    // private $PATHSTRING = "/students/gxz6ja/students/gxz6ja/rps_secret/templates/"; //use for server
 
 
     public function __construct($input) {
@@ -166,31 +166,34 @@ class RPSController {
 
     public function gameLogic() {
         $username = $_SESSION["username"];
-        $_SESSION["match_result"] = "Win";
         $move = $_POST["game_move"];
-        switch($move) {
-            case "rock":
-                $this->db->query("update users set numwin = numwin + 1 where username = $1;", $username);
-                $this->db->query("update users set numrock = numrock + 1 where username = $1;", $username);
-                $this->db->query("update users set numrockwin = numrockwin + 1 where username = $1;", $username);
-                break;
-            case "paper":
-                $this->db->query("update users set numwin = numwin + 1 where username = $1;", $username);
-                $this->db->query("update users set numpaper = numpaper + 1 where username = $1;", $username);
-                $this->db->query("update users set numpaperwin = numpaperwin + 1 where username = $1;", $username);
-                break;
-            case "scissors":
-                $this->db->query("update users set numwin = numwin + 1 where username = $1;", $username);
-                $this->db->query("update users set numscissors = numscissors + 1 where username = $1;", $username);
-                $this->db->query("update users set numscissorswin = numscissorswin + 1 where username = $1;", $username);
-                break;
-            case "forfeit":
-                $_SESSION["match_result"] = "Lose";
-                $this->db->query("update users set numloss = numloss + 1 where username = $1;", $username);
-                $this->db->query("update users set numrock = numrock + 1 where username = $1;", $username);
-                $this->db->query("update users set numrockloss = numrockloss + 1 where username = $1;", $username);
-                break;
+        if ($move == "forfeit") {
+            $this->db->query("update users set numloss = numloss + 1 where username = $1;", $username);
+            $_SESSION["displayed_match_result"] = "Forfeited the Match";
+            include($this->PATHSTRING . "results.php");
+            return;
         }
+        $temp_game_outcome = rand(1, 100);
+        switch($temp_game_outcome) {
+            case $temp_game_outcome < 33.33:
+                $this->db->query("update users set numwin = numwin + 1 where username = $1;", $username);
+                $this->db->query("update users set num" . $move . " = num" . $move . " + 1 where username = $1;", $username);
+                $this->db->query("update users set num" . $move . "win = num" . $move . "win + 1 where username = $1;", $username);
+                $_SESSION["displayed_match_result"] = "Win";
+                break;
+            case $temp_game_outcome < 66.66:
+                $this->db->query("update users set numloss = numloss + 1 where username = $1;", $username);
+                $this->db->query("update users set num" . $move . " = num" . $move . " + 1 where username = $1;", $username);
+                $this->db->query("update users set num" . $move . "loss = num" . $move . "loss + 1 where username = $1;", $username);
+                $_SESSION["displayed_match_result"] = "Lose";
+                break;
+            case $temp_game_outcome >= 66.66:
+                $this->db->query("update users set numtie = numtie + 1 where username = $1;", $username);
+                $this->db->query("update users set num" . $move . " = num" . $move . " + 1 where username = $1;", $username);
+                $this->db->query("update users set num" . $move . "tie = num" . $move . "tie + 1 where username = $1;", $username);
+                $_SESSION["displayed_match_result"] = "Tied";
+                break;
+            }
         include($this->PATHSTRING . "results.php");
     }
 

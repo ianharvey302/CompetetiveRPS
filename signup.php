@@ -18,7 +18,7 @@
     <body>
         <!--Navbar stuff-->
         <?php
-            include("./navbar.php");
+            include("navbar.php");
         ?>
         <div class="main-container">
             <div class="home-center justify-content-center">

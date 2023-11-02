@@ -17,7 +17,7 @@
     <body>
         <!--Navbar stuff-->
         <?php
-            include("./navbar.php");
+            include("navbar.php");
         ?>
 
         <div class="main-container">

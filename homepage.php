@@ -18,7 +18,7 @@
     <body>
         <!--Navbar stuff-->
         <?php
-            include("./navbar.php");
+            include("navbar.php");
         ?>
         <div class="main-container">
             <div class="home-center justify-content-center">
@@ -70,7 +70,7 @@
                         
                         else {
                             echo '
-                            <div class="card-header text-center">
+                            <div class="card-header text-center" aria-label="User Welcome" role="banner">
                                 Welcome ' . $_SESSION["username"] . '!
                             </div>
                             <div class="card-body">

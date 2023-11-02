@@ -17,7 +17,7 @@
     <body>
         <!--Navbar stuff-->
         <?php
-            include("./navbar.php");
+            include("navbar.php");
         ?>
 
         <div class="main-container">
@@ -27,7 +27,7 @@
                     <?php
                         if($total > 0) {
                             echo '
-                            <h3><span style="color: #0a8a0a">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: #ef0000">Loss</span> Percentage</h3>
+                            <h3><span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: #ef0000">Loss</span> Percentage</h3>
                             <div class="progress">
                                 <div class="progress-bar win" role="progressbar" style="width: ' . $pWin . '%" aria-valuenow="' . $pWin .'" aria-valuemin="0" aria-valuemax="100">' . $pWin . '%</div>
                                 <div class="progress-bar tie" role="progressbar" style="width: ' . $pTie . '%" aria-valuenow="' . $pTie . '" aria-valuemin="0" aria-valuemax="100">' . $pTie . '%</div>
