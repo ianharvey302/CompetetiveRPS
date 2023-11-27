@@ -68,43 +68,12 @@ class RPSController {
     }
 
     public function showGlobalStats() {
-        $res = $this->db->query("SELECT
-            SUM(numwin) as sum_numwin,
-            SUM(numtie) as sum_numtie,
-            SUM(numloss) as sum_numloss,
-            SUM(numrock) as sum_numrock,
-            SUM(numrockwin) as sum_numrockwin,
-            SUM(numrocktie) as sum_numrocktie,
-            SUM(numrockloss) as sum_numrockloss,
-            SUM(numpaper) as sum_numpaper,
-            SUM(numpaperwin) as sum_numpaperwin,
-            SUM(numpapertie) as sum_numpapertie,
-            SUM(numpaperloss) as sum_numpaperloss,
-            SUM(numscissors) as sum_numscissors,
-            SUM(numscissorswin) as sum_numscissorswin,
-            SUM(numscissorstie) as sum_numscissorstie,
-            SUM(numscissorsloss) as sum_numscissorsloss
-            FROM users;");
-        $numWin = $res[0]["sum_numwin"];
-        $numTie = $res[0]["sum_numtie"];
-        $numLoss = $res[0]["sum_numloss"];
-        $numRock = $res[0]["sum_numrock"];
-        $numRockWin = $res[0]["sum_numrockwin"];
-        $numRockTie = $res[0]["sum_numrocktie"];
-        $numRockLoss = $res[0]["sum_numrockloss"];
-        $numPaper = $res[0]["sum_numpaper"];
-        $numPaperWin = $res[0]["sum_numpaperwin"];
-        $numPaperTie = $res[0]["sum_numpapertie"];
-        $numPaperLoss = $res[0]["sum_numpaperloss"];
-        $numScissors = $res[0]["sum_numscissors"];
-        $numScissorsWin = $res[0]["sum_numscissorswin"];
-        $numScissorsTie = $res[0]["sum_numscissorstie"];
-        $numScissorsLoss = $res[0]["sum_numscissorsloss"];
-        list($total, $pWin, $pTie, $pLoss) = $this->percentages($numWin, $numTie, $numLoss);
-        list($totalRPS, $pRock, $pPaper, $pScissors) = $this->percentages($numRock, $numPaper, $numScissors);
-        list($totalRock, $pRockWin, $pRockTie, $pRockLoss) = $this->percentages($numRockWin, $numRockTie, $numRockLoss);
-        list($totalPaper, $pPaperWin, $pPaperTie, $pPaperLoss) = $this->percentages($numPaperWin, $numPaperTie, $numPaperLoss);
-        list($totalScissors, $pScissorsWin, $pScissorsTie, $pScissorsLoss) = $this->percentages($numScissorsWin, $numScissorsTie, $numScissorsLoss);
+        $globalProfile = $this->db->getGlobalStats();
+        list($total, $pWin, $pTie, $pLoss) = $this->percentages($globalProfile["numWin"], $globalProfile["numLoss"], $globalProfile["numTie"]);
+        list($totalRPS, $pRock, $pPaper, $pScissors) = $this->percentages($globalProfile["numRock"], $globalProfile["numPaper"], $globalProfile["numScissors"]);
+        list($totalRock, $pRockWin, $pRockTie, $pRockLoss) = $this->percentages($globalProfile["numRockWin"], $globalProfile["numRockTie"], $globalProfile["numRockLoss"]);
+        list($totalPaper, $pPaperWin, $pPaperTie, $pPaperLoss) = $this->percentages($globalProfile["numPaperWin"], $globalProfile["numPaperTie"], $globalProfile["numPaperLoss"]);
+        list($totalScissors, $pScissorsWin, $pScissorsTie, $pScissorsLoss) = $this->percentages($globalProfile["numScissorsWin"], $globalProfile["numScissorsTie"], $globalProfile["numScissorsLoss"]);
         include($this->PATHSTRING . "globalstats.php");
     }
 
@@ -114,27 +83,12 @@ class RPSController {
             return;
         }
         $username = $_SESSION["username"];
-        $res = $this->db->query("select * from users where username = $1;", $username);
-        $numWin = $res[0]["numwin"];
-        $numTie = $res[0]["numtie"];
-        $numLoss = $res[0]["numloss"];
-        $numRock = $res[0]["numrock"];
-        $numRockWin = $res[0]["numrockwin"];
-        $numRockTie = $res[0]["numrocktie"];
-        $numRockLoss = $res[0]["numrockloss"];
-        $numPaper = $res[0]["numpaper"];
-        $numPaperWin = $res[0]["numpaperwin"];
-        $numPaperTie = $res[0]["numpapertie"];
-        $numPaperLoss = $res[0]["numpaperloss"];
-        $numScissors = $res[0]["numscissors"];
-        $numScissorsWin = $res[0]["numscissorswin"];
-        $numScissorsTie = $res[0]["numscissorstie"];
-        $numScissorsLoss = $res[0]["numscissorsloss"];
-        list($total, $pWin, $pTie, $pLoss) = $this->percentages($numWin, $numTie, $numLoss);
-        list($totalRPS, $pRock, $pPaper, $pScissors) = $this->percentages($numRock, $numPaper, $numScissors);
-        list($totalRock, $pRockWin, $pRockTie, $pRockLoss) = $this->percentages($numRockWin, $numRockTie, $numRockLoss);
-        list($totalPaper, $pPaperWin, $pPaperTie, $pPaperLoss) = $this->percentages($numPaperWin, $numPaperTie, $numPaperLoss);
-        list($totalScissors, $pScissorsWin, $pScissorsTie, $pScissorsLoss) = $this->percentages($numScissorsWin, $numScissorsTie, $numScissorsLoss);
+        $userProfile = $this->db->getUserStats($username);
+        list($total, $pWin, $pTie, $pLoss) = $this->percentages($userProfile["numWin"], $userProfile["numLoss"], $userProfile["numTie"]);
+        list($totalRPS, $pRock, $pPaper, $pScissors) = $this->percentages($userProfile["numRock"], $userProfile["numPaper"], $userProfile["numScissors"]);
+        list($totalRock, $pRockWin, $pRockTie, $pRockLoss) = $this->percentages($userProfile["numRockWin"], $userProfile["numRockTie"], $userProfile["numRockLoss"]);
+        list($totalPaper, $pPaperWin, $pPaperTie, $pPaperLoss) = $this->percentages($userProfile["numPaperWin"], $userProfile["numPaperTie"], $userProfile["numPaperLoss"]);
+        list($totalScissors, $pScissorsWin, $pScissorsTie, $pScissorsLoss) = $this->percentages($userProfile["numScissorsWin"], $userProfile["numScissorsTie"], $userProfile["numScissorsLoss"]);
         include($this->PATHSTRING . "profile.php");
     }
 
@@ -198,34 +152,8 @@ class RPSController {
     }
 
     public function dumpUserStats() {
-        $userProfile = $this->createUserJson();
-        echo $userProfile;
-    }
-
-    public function createUserJson() {
-        $username = $_SESSION["username"];
-        $res = $this->db->query("select * from users where username = $1;", $username);
-        $numWin = $res[0]["numwin"];
-        $numTie = $res[0]["numtie"];
-        $numLoss = $res[0]["numloss"];
-        $numRock = $res[0]["numrock"];
-        $numRockWin = $res[0]["numrockwin"];
-        $numRockTie = $res[0]["numrocktie"];
-        $numRockLoss = $res[0]["numrockloss"];
-        $numPaper = $res[0]["numpaper"];
-        $numPaperWin = $res[0]["numpaperwin"];
-        $numPaperTie = $res[0]["numpapertie"];
-        $numPaperLoss = $res[0]["numpaperloss"];
-        $numScissors = $res[0]["numscissors"];
-        $numScissorsWin = $res[0]["numscissorswin"];
-        $numScissorsTie = $res[0]["numscissorstie"];
-        $numScissorsLoss = $res[0]["numscissorsloss"];
-
-        $userProfile = array('username' => $username, 'numWin' => $numWin, 'numLoss' =>$numLoss, 'numTie' => $numTie, 'numRock' => $numRock, 
-            'numRockWin' => $numRockWin, 'numRockLoss' => $numRockLoss, 'numRockTie' => $numRockTie, 'numPaper' => $numPaper, 'numPaperWins' => $numPaperWin, 
-            'numPaperLoss' => $numPaperLoss, 'numPaperTie' => $numPaperTie, 'numScissors' => $numScissors, 'numScissorWin' => $numScissorsWin, 
-            'numScissorLoss' => $numScissorsLoss, 'NumScissorTie' => $numScissorsTie);
-        return json_encode($userProfile, JSON_PRETTY_PRINT);
+        echo json_encode($this->db->getUserStats($_SESSION["username"]), JSON_PRETTY_PRINT);
+        // $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this latet
     }
 
     public function login() {
@@ -283,6 +211,12 @@ class RPSController {
 
         if($_POST["password"] != "" and !preg_match("/^.*[\W\d_]+.*$/", $_POST["password"])) {
             $message = "<div class=\"alert alert-danger text-center\" role=\"alert\">Password must contain at least one special character.</div>";
+            $this->showSignUpPage($message);
+            return;
+        }
+
+        if(preg_match("/^Guest/i", $_POST["username"])) {
+            $message = "<div class=\"alert alert-danger text-center\" role=\"alert\">Username cannot contain \"Guest\" </div>";
             $this->showSignUpPage($message);
             return;
         }

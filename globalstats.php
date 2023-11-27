@@ -48,7 +48,7 @@
                 </div>
                 <div class="wl-per">
                     <?php
-                        if($numRock > 0) {
+                        if($globalProfile["numRock"] > 0) {
                             echo '
                             <h3><span style="color: #be5847">Rock</span> <span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: red">Loss</span> Percentage</h3>
                             <div id="rock-wr" class="progress">
@@ -63,7 +63,7 @@
                         }
                     ?>
                     <?php
-                        if($numPaper > 0) {
+                        if($globalProfile["numPaper"] > 0) {
                             echo '
                             <h3><span style="color: #ff5599">Paper</span> <span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: red">Loss</span> Percentage</h3>
                             <div id="paper-wr" class="progress">
@@ -78,7 +78,7 @@
                         }
                     ?>
                     <?php
-                        if($numScissors > 0) {
+                        if($globalProfile["numScissors"] > 0) {
                             echo '
                             <h3><span style="color: #92705f">Scissor</span> <span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: red">Loss</span> Percentage</h3>
                             <div id="scissor-wr" class="progress">
