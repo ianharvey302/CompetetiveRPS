@@ -39,7 +39,13 @@ class RPSController {
                 $this->createUser();
                 break;
             case "play":
-                $this->playGame();
+                $this->showQueue();
+                break;
+            // case "queue":
+            //     $this->queue();
+            //     break;
+            case "enqueue":
+                $this->enqueue();
                 break;
             case "logout":
                 $this->logout();
@@ -56,6 +62,18 @@ class RPSController {
             default:
                 $this->showHomePage();
                 break;
+        }
+    }
+
+    public function showQueue() {
+        include($this->PATHSTRING . "queue.php");
+    }
+
+    public function enqueue() {
+        $username = ($_SESSION["username"]) ? $_SESSION["username"] : "Guest";
+        $this->db->enqueuePlayer($username);
+        while(!$this->db->getFirstAvailablePlayer()) {
+
         }
     }
 
