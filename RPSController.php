@@ -70,11 +70,15 @@ class RPSController {
     }
 
     public function enqueue() {
-        $username = ($_SESSION["username"]) ? $_SESSION["username"] : "Guest";
-        $this->db->enqueuePlayer($username);
-        while(!$this->db->getFirstAvailablePlayer()) {
-
+        $username = (isset($_SESSION['signed_in'])) ? $_SESSION["username"] : "Guest";
+        $_SESSION["user_match_id"] = $this->db->enqueuePlayer($username);
+        $opponent = $this->db->getFirstAvailablePlayer($_SESSION["user_match_id"]);
+        while(!$opponent) {
+            $opponent = $this->db->getFirstAvailablePlayer($_SESSION["user_match_id"]);
         }
+        $_SESSION["opponent"] = $opponent;
+        $this->db->dequeuePlayer($opponent["id"]);
+        echo json_encode($opponent, JSON_PRETTY_PRINT);
     }
 
     public function showHomePage($message = '') {
@@ -171,7 +175,8 @@ class RPSController {
 
     public function dumpUserStats() {
         echo json_encode($this->db->getUserStats($_SESSION["username"]), JSON_PRETTY_PRINT);
-        // $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this latet
+        $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this later
+        $this->db->query("DROP TABLE matchmaking");
     }
 
     public function login() {

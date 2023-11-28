@@ -34,6 +34,7 @@ class Database {
             numScissorsTie INTEGER DEFAULT 0,
             numScissorsLoss INTEGER DEFAULT 0
             );',
+            "INSERT INTO users (username) VALUES ('Guest') ON CONFLICT (username) DO NOTHING;",
             'CREATE TABLE IF NOT EXISTS matchmaking (
             id SERIAL PRIMARY KEY,
             username TEXT NOT NULL,
@@ -126,92 +127,107 @@ class Database {
     }
 
     public function enqueuePlayer($username) {
-        $this->query("insert into matchmaking (username) values ($1);", $username);
+        $res = $this->query("INSERT INTO matchmaking (username) VALUES ($1) RETURNING id;", $username);
+        if (!$res) return false;
+        return $res[0]["id"];
     }
 
     public function dequeuePlayer($primaryKey) {
-        $this->query("delete from matchmaking where (id) = ($1);", $primaryKey);
+        $this->query("DELETE FROM matchmaking WHERE id = ($1);", $primaryKey);
     }
 
-    public function getFirstAvailablePlayer() {
+    public function createMoveTable($username, $move) {
+        $tableRes = $this->query("CREATE TABLE IF NOT EXISTS ($1) (move TEXT PRIMARY KEY);", $username);
+        $insertRes = $this->query("INSERT INTO ($1) (move) VALUES ($2)", $username, $move);
+        if (!$tableRes) return "failed to make table";
+        if (!$insertRes) return "failed to insert move";
+        return true;;
+    }
+
+    public function deleteMoveTable($username) {
+        $this->query("DROP TABLE IF EXISTS ($1)", $username);
+    }
+
+    public function getFirstAvailablePlayer($id) {
         $res = $this->query('SELECT *
         FROM matchmaking
-        WHERE inQueue = TRUE
-        ORDER BY entry_time
-        LIMIT 1;');
-        return $res[0]["username"];
+        WHERE id <> ($1)
+        ORDER BY id
+        LIMIT 1;', $id);
+        if (empty($res)) return false;
+        return $res[0];
     }
 
     public function rockWin($username) {
         $this->query("UPDATE users SET 
         numWin = numWin + 1,
         numRock = numRock + 1, 
-        numRockWin = numRockWin + 1 WHERE (username) = ($1);", $username);
+        numRockWin = numRockWin + 1 WHERE username = ($1);", $username);
     }
 
     public function rockTie($username) {
         $this->query("UPDATE users SET 
         numTie = numTie + 1,
         numRock = numRock + 1, 
-        numRockTie = numRockTie + 1 WHERE (username) = ($1);", $username);
+        numRockTie = numRockTie + 1 WHERE username = ($1);", $username);
     }
 
     public function rockLoss($username) {
         $this->query("UPDATE users SET 
         numLoss = numLoss + 1,
         numRock = numRock + 1, 
-        numRockLoss = numRockLoss + 1 WHERE (username) = ($1);", $username);
+        numRockLoss = numRockLoss + 1 WHERE username = ($1);", $username);
     }
 
     public function paperWin($username) {
         $this->query("UPDATE users SET 
         numWin = numWin + 1,
         numPaper = numPaper + 1, 
-        numPaperWin = numPaperWin + 1 WHERE (username) = ($1);", $username);
+        numPaperWin = numPaperWin + 1 WHERE username = ($1);", $username);
     }
 
     public function paperTie($username) {
         $this->query("UPDATE users SET 
         numTie = numTie + 1,
         numPaper = numPaper + 1, 
-        numPaperTie = numPaperTie + 1 WHERE (username) = ($1);", $username);
+        numPaperTie = numPaperTie + 1 WHERE username = ($1);", $username);
     }
 
     public function paperLoss($username) {
         $this->query("UPDATE users SET 
         numLoss = numLoss + 1,
         numPaper = numPaper + 1, 
-        numPaperLoss = numPaperLoss + 1 WHERE (username) = ($1);", $username);
+        numPaperLoss = numPaperLoss + 1 WHERE username = ($1);", $username);
     }
 
     public function scissorsWin($username) {
         $this->query("UPDATE users SET 
         numWin = numWin + 1,
         numScissors = numScissors + 1, 
-        numScissorsWin = numScissorsWin + 1 WHERE (username) = ($1);", $username);
+        numScissorsWin = numScissorsWin + 1 WHERE username = ($1);", $username);
     }
 
     public function scissorsTie($username) {
         $this->query("UPDATE users SET 
         numTie = numTie + 1,
         numScissors = numScissors + 1, 
-        numScissorsTie = numScissorsTie + 1 WHERE (username) = ($1);", $username);
+        numScissorsTie = numScissorsTie + 1 WHERE username = ($1);", $username);
     }
 
     public function scissorsLoss($username) {
         $this->query("UPDATE users SET 
         numLoss = numLoss + 1,
         numScissors = numScissors + 1, 
-        numScissorsLoss = numScissorsLoss + 1 WHERE (username) = ($1);", $username);
+        numScissorsLoss = numScissorsLoss + 1 WHERE username = ($1);", $username);
     }
 
     public function loseByDefault($username) {
         $this->query("UPDATE users SET
-        numLoss = numLoss + 1 WHERE (username) = ($1)", $username);
+        numLoss = numLoss + 1 WHERE username = ($1)", $username);
     }
 
     public function winByDefault($username) {
         $this->query("UPDATE users SET
-        numWin = numWin + 1 WHERE (username) = ($1)", $username);
+        numWin = numWin + 1 WHERE username = ($1)", $username);
     }
 }
