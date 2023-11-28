@@ -23,7 +23,7 @@
         ?>
 
         <div class="main-container">
-            <div class="centered-container-flex">
+            <div id="game-container" class="centered-container-flex">
                 <h1 style="font-size: 10vh; text-align:center;">Finding Game ...</h1>
                 <div style="margin-top: 20%;">
                 <a href="?command=home" class="btn btn-lg">Cancel</a>

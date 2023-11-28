@@ -37,9 +37,7 @@ class Database {
             "INSERT INTO users (username) VALUES ('Guest') ON CONFLICT (username) DO NOTHING;",
             'CREATE TABLE IF NOT EXISTS matchmaking (
             id SERIAL PRIMARY KEY,
-            username TEXT NOT NULL,
-            inQueue BOOLEAN DEFAULT TRUE,
-            inGame BOOLEAN DEFAULT FALSE
+            username TEXT NOT NULL
             );'];
         
         foreach ($sqlList as $query) {
@@ -136,16 +134,56 @@ class Database {
         $this->query("DELETE FROM matchmaking WHERE id = ($1);", $primaryKey);
     }
 
-    public function createMoveTable($username, $move) {
-        $tableRes = $this->query("CREATE TABLE IF NOT EXISTS ($1) (move TEXT PRIMARY KEY);", $username);
-        $insertRes = $this->query("INSERT INTO ($1) (move) VALUES ($2)", $username, $move);
-        if (!$tableRes) return "failed to make table";
-        if (!$insertRes) return "failed to insert move";
-        return true;;
+    public function createMoveTable($id, $move) {
+        $tableName = "move_" . $id;
+        $tableQuery = "CREATE TABLE IF NOT EXISTS $tableName (move TEXT PRIMARY KEY)";
+    
+        // Insert data query
+        $insertQuery = "INSERT INTO $tableName(move) VALUES (' " . $move . " ')";
+        
+        // Execute the queries
+        $tableRes = $this->query($tableQuery);
+        $insertRes = $this->query($insertQuery);
+    
+        // Check for errors
+        if (!$tableRes) return "Failed to create table";
+        if (!$insertRes) return "Failed to insert move";
+    
+        return true;
     }
+    
 
-    public function deleteMoveTable($username) {
-        $this->query("DROP TABLE IF EXISTS ($1)", $username);
+    public function getMoveEntry($id) {
+        $tableName = "move_" . $id;
+    
+        // Check if the table exists
+        $tableExists = $this->tableExists($tableName);
+        if (!$tableExists) {
+            return false;
+        }
+    
+        // If the table exists, proceed with fetching the move entry
+        $getRes = $this->query("SELECT * FROM $tableName;");
+        if (!$getRes) {
+            return false;
+        }
+    
+        // Drop the table after fetching the move entry
+        $this->query("DROP TABLE IF EXISTS $tableName;");
+    
+        return $getRes[0]["move"];
+    }
+    
+    // Helper function to check if a table exists
+    private function tableExists($tableName) {
+        $checkRes = $this->query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1);", $tableName);
+        return $checkRes[0]['exists'] === 't';
+    }
+    
+
+    public function deleteMoveTable($id) {
+        $tableName = "move_" . $id;
+        $this->query("DROP TABLE IF EXISTS ($1)", $tableName);
     }
 
     public function getFirstAvailablePlayer($id) {
