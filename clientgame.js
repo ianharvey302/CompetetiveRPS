@@ -8,11 +8,11 @@ let gameAjax;
 $(document).ready(function() {
     enqueueAjax = $.get("?command=enqueue", handleEnqueueAjax);
 
-    $(window).on("beforeunload", function() {
-        enqueueAjax.abort();
-        navigator.sendBeacon("?command=dequeue", "");
-        return "Are you sure you want to leave?";
-    });
+    // $(window).on("beforeunload", function() {
+    //     enqueueAjax.abort();
+    //     navigator.sendBeacon("?command=dequeue", "");
+    //     return "Are you sure you want to leave?";
+    // });
 });
 
 function handleMoveButtonClick() {
@@ -45,10 +45,10 @@ function handleLockButtonClick() {
                 matchResultString = "Errored Out";
         }
         loadResultsScreen(matchResultString);
-        // $("#new-game").on("click", function() {
-        //     loadQueueScreen();
-        //     enqueueAjax = $.get("?command=enqueue", handleEnqueueAjax);
-        // });
+        $("#new-game").on("click", function() {
+            loadQueueScreen();
+            enqueueAjax = $.get("?command=enqueue", handleEnqueueAjax);
+        });
     });
 }
 
