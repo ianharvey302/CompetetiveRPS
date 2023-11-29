@@ -130,6 +130,11 @@ class Database {
         return $res[0]["id"];
     }
 
+    public function checkIfInQueue($primaryKey) {
+        $res = $this->query("SELECT * FROM terms WHERE id = ($1);", $primaryKey);
+        return !empty($res);
+    }
+
     public function dequeuePlayer($primaryKey) {
         $this->query("DELETE FROM matchmaking WHERE id = ($1);", $primaryKey);
     }

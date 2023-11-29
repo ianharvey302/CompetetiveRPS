@@ -31,6 +31,7 @@ $(document).ready(function() {
 
 function handleMoveButtonClick() {
     userMove = $(this).attr("value");
+    $(".lock-btn").prop("disabled", false);
     $(this).css("background-color", "");
     $(".match-moves > .move-btn").each(function() {
         if ($(this).attr("value") != userMove) {
@@ -98,7 +99,7 @@ function loadQueueScreen() {
     $("#game-container").html(
         '<h1 style="font-size: 10vh; text-align:center;">Finding Game ...</h1>' +
         '<div style="margin-top: 20%;">' +
-        '<a href="?command=home" class="btn btn-lg">Cancel</a>' +
+        //'<a href="?command=home" class="btn btn-lg">Cancel</a>' +
         '</div>'
     );
 }
@@ -117,7 +118,7 @@ function loadGameScreen() {
         '<button type="button" value="scissors" class="btn move-btn scissor-btn">SCISSORS</button>' +
         '</div>' +
         '<div class="match-submit">' +
-        '<button type="button" class="btn btn-lg lock-btn">LOCK IN</button>' +
+        '<button type="button" class="btn btn-lg lock-btn" disabled>LOCK IN</button>' +
         '<button type="button" value="forfeit" class="nav-link forfeit-btn">Forfeit</button>' +
         '</div>' +
         '</div>'

@@ -14,6 +14,67 @@
         <link rel="stylesheet/less" type="text/css" href="styles/main.less">
          
         <title>Sign Up - Competitive RPS</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <script>
+            var usernameGood = false;
+            var passwordGood = true;
+
+            $(document).ready(function() {
+                $("#username").on("keyup", checkUsername);
+                $("#password").on("keyup", checkPassword);
+            });
+
+            function checkUsername() {
+                if($("#username").val().length == 0) {
+                    $("#usernameMessage").html("");
+                    usernameGood = false;
+                    enableCheck();
+                    return;
+                }
+
+                $.get("?command=checkUsername&username=" + $("#username").val(), function(data) {
+                    var result = JSON.parse(data).result;
+                    if(!result) {
+                        $("#usernameMessage").html("<div class=\"alert alert-danger text-center\" role=\"alert\">Username already taken</div>");
+                        usernameGood = false;
+                    }
+                    else {
+                        $("#usernameMessage").html("");
+                        usernameGood = true;
+                    }
+                    enableCheck();
+                });
+            }
+
+            function checkPassword() {
+                if($("#password").val().length != 0 && $("#password").val().length < 8) {
+                    $("#passwordMessage").html("<div class=\"alert alert-danger text-center\" role=\"alert\">Password must be at least 8 characters long if set</div>");
+                    passwordGood = false;
+                }
+                else if($("#password").val().length != 0 && $("#password").val().search(/^.*[\W\d_]+.*$/) == -1) {
+                    $("#passwordMessage").html("<div class=\"alert alert-danger text-center\" role=\"alert\">Password must contain at least one special character.</div>");
+                    passwordGood = false;
+                }
+                else if($("#password").val().length != 0 && $("#password").val().search(/Guest/) != -1) {
+                    $("#passwordMessage").html("<div class=\"alert alert-danger text-center\" role=\"alert\">Username cannot contain \"Guest\" </div>");
+                    passwordGood = false;
+                }
+                else {
+                    $("#passwordMessage").html("");
+                    passwordGood = true; 
+                }
+                enableCheck();
+            }
+
+            function enableCheck() {
+                console.log(usernameGood);
+                if(usernameGood && passwordGood)
+                    $("#submitButton").prop("disabled", false);
+                else
+                    $("#submitButton").prop("disabled", true);
+            }
+        </script>
     </head>
     <body>
         <!--Navbar stuff-->
@@ -39,11 +100,12 @@
                                     <small id="passwordHelp" class="form-text">Must include at least one number or special character.</small><br>
                                     <small id="passwordHelp" class="form-text">*Not required.</small>
                                 </div>
-                                <button type="submit" class="btn btn-lg">Sign Up</button>
+                                <button id="submitButton" type="submit" class="btn btn-lg" disabled>Sign Up</button>
                             </form> 
                         </div>
                         <br>
-                        <?=$message?>
+                        <div id="usernameMessage"></div>
+                        <div id="passwordMessage"></div>
                     </div>
                 </div>
             </div>

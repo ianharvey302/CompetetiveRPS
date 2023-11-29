@@ -56,11 +56,17 @@ class RPSController {
             case "global":
                 $this->showGlobalStats();
                 break;
+            case "globalStats":
+                $this->getGlobalStats();
+                break;
             case "profile":
                 $this->showProfile();
                 break;
             case "dump_stats":
                 $this->dumpUserStats();
+                break;
+            case "checkUsername":
+                $this->checkUsername();
                 break;
             default:
                 $this->showHomePage();
@@ -98,13 +104,11 @@ class RPSController {
     }
 
     public function showGlobalStats() {
-        $globalProfile = $this->db->getGlobalStats();
-        list($total, $pWin, $pTie, $pLoss) = $this->percentages($globalProfile["numWin"], $globalProfile["numLoss"], $globalProfile["numTie"]);
-        list($totalRPS, $pRock, $pPaper, $pScissors) = $this->percentages($globalProfile["numRock"], $globalProfile["numPaper"], $globalProfile["numScissors"]);
-        list($totalRock, $pRockWin, $pRockTie, $pRockLoss) = $this->percentages($globalProfile["numRockWin"], $globalProfile["numRockTie"], $globalProfile["numRockLoss"]);
-        list($totalPaper, $pPaperWin, $pPaperTie, $pPaperLoss) = $this->percentages($globalProfile["numPaperWin"], $globalProfile["numPaperTie"], $globalProfile["numPaperLoss"]);
-        list($totalScissors, $pScissorsWin, $pScissorsTie, $pScissorsLoss) = $this->percentages($globalProfile["numScissorsWin"], $globalProfile["numScissorsTie"], $globalProfile["numScissorsLoss"]);
         include($this->PATHSTRING . "globalstats.php");
+    }
+
+    public function getGlobalStats() {
+        echo json_encode($this->db->getGlobalStats());
     }
 
     public function showProfile() {
@@ -232,7 +236,10 @@ class RPSController {
     }
 
     public function dumpUserStats() {
-        echo json_encode($this->db->getUserStats($_SESSION["username"]), JSON_PRETTY_PRINT);
+        if(!isset($_GET["username"]))
+            echo json_encode($this->db->getUserStats($_SESSION["username"]), JSON_PRETTY_PRINT);
+        else
+            echo json_encode($this->db->getUserStats($_GET["username"]), JSON_PRETTY_PRINT);
         // echo json_encode($this->db->query("SELECT * FROM matchmaking"), JSON_PRETTY_PRINT);
         // $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this later
         // $this->db->query("DROP TABLE matchmaking");
@@ -299,7 +306,7 @@ class RPSController {
 
         if(preg_match("/^Guest/i", $_POST["username"])) {
             $message = "<div class=\"alert alert-danger text-center\" role=\"alert\">Username cannot contain \"Guest\" </div>";
-            $this->showSignUpPage($message);
+            $this->showSignUpPage();
             return;
         }
 
@@ -320,4 +327,8 @@ class RPSController {
         $this->showHomePage();
     }
 
+    public function checkUsername() {
+        $res = $this->db->query("select * from users where username = $1;", $_GET["username"]);
+        echo json_encode(["result" => empty($res)], JSON_PRETTY_PRINT);
+    }
 }

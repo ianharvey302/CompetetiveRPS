@@ -34,7 +34,7 @@
                         <button type="submit" name="game_move" value="scissors" class="btn move-btn scissor-btn">SCISSORS</button>
                     </div>
                     <div class="match-submit">
-                        <button type="button" class="btn btn-lg lock-btn">LOCK IN</button>
+                        <button type="button" class="btn btn-lg lock-btn" disabled>LOCK IN</button>
                         <button type="submit" name="game_move" value="forfeit" class="nav-link forfeit-btn">Forfeit</a>
                     </div>
                 </form>     

@@ -13,6 +13,110 @@
         <link rel="stylesheet/less" type="text/css" href="styles/main.less">
          
         <title>Profile - Competitive RPS</title>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <script>
+            $(document).ready(function() {
+                $('#usernameForm').on('keyup keypress', function(e) {
+                    if (e.keyCode === 13) {
+                        e.preventDefault();
+                        if(!$("#submitButton").prop('disabled')) {
+                            showNewStats();
+                        }
+                    }
+                });
+                $("#usernameField").on("keyup", checkUsername);
+                showStats(<?php echo '"' . $username . '"'; ?>);
+            });
+
+            function showNewStats() {
+                showStats($("#usernameField").val());
+            }
+
+            function showStats(username) {
+                $("#usernameDisplay").text(username + "'s Stats");
+
+                $.get("?command=dump_stats&username=" + username, (data) => {
+                    var result = JSON.parse(data);
+                    if(parseInt(result['numWin']) + parseInt(result['numTie']) + parseInt(result['numLoss']) == 0) {
+                        $("#usage-per").html("");
+                        $("#noGame").show();
+                    }
+                    else {
+                        $("#noGame").hide();
+                        $("#usage-per").html("<h3><span style='color: #0b8b0b'>Win</span>-<span style='color: #59e6ff'>Tie</span>-<span style='color: #ef0000'>Loss</span> Percentage</h3><div id='WLT' class='progress'></div><h3><span style='color: #be5847'>Rock</span>-<span style='color: #ff5599'>Paper</span>-<span style='color: #92705f'>Scissor</span> Usage</h3><div id='RPS' class='progress'></div>");
+                        $("#WLT").html(wlt(result['numWin'], result['numTie'], result['numLoss']));
+                        $("#RPS").html(rps(result['numRock'], result['numPaper'], result['numScissors']));
+                    }
+                    if(parseInt(result['numRock']) == 0) {
+                        $("#rock").html("");
+                        $("#noRock").show();
+                    }
+                    else {
+                        $("#noRock").hide();
+                        $("#rock").html("<h3><span style='color: #be5847'>Rock</span> <span style='color: #0b8b0b'>Win</span>-<span style='color: #59e6ff'>Tie</span>-<span style='color: red'>Loss</span> Percentage</h3><div id='rock-wr' class='progress'></div");
+                        $("#rock-wr").html(wlt(result['numRockWin'], result['numRockTie'], result['numRockLoss']));
+                    }
+                    if(parseInt(result['numPaper']) == 0) {
+                        $("#paper").html("");
+                        $("#noPaper").show();
+                    }
+                    else {
+                        $("#noPaper").hide();
+                        $("#paper").html("<h3><span style='color: #ff5599'>Paper</span> <span style='color: #0b8b0b'>Win</span>-<span style='color: #59e6ff'>Tie</span>-<span style='color: red'>Loss</span> Percentage</h3><div id='paper-wr' class='progress'></div>");
+                        $("#paper-wr").html(wlt(result['numPaperWin'], result['numPaperTie'], result['numPaperLoss']));
+                    }
+                    if(parseInt(result['numScissors']) == 0) {
+                        $("#scissors").html("");
+                        $("#noScissors").show();
+                    }
+                    else {
+                        $("#noScissors").hide();
+                        $("#scissors").html("<h3><span style='color: #92705f'>Scissor</span> <span style='color: #0b8b0b'>Win</span>-<span style='color: #59e6ff'>Tie</span>-<span style='color: red'>Loss</span> Percentage</h3><div id='scissor-wr' class='progress'></div>");
+                        $("#scissor-wr").html(wlt(result['numScissorsWin'], result['numScissorsTie'], result['numScissorsLoss']));
+                    }
+                });
+            }
+
+            function wlt(x, y, z) {
+                var total = parseInt(x) + parseInt(y) + parseInt(z);
+                var px = x * 100 / total;
+                var py = y / total * 100;
+                var pz = z / total * 100;
+                return "<div class='progress-bar win' role='progressbar' style='width: " + px + "%' aria-valuenow='" + px + "' aria-valuemin='0' aria-valuemax='100'>" + px.toFixed(2) + "%</div>" +
+                       "<div class='progress-bar tie' role='progressbar' style='width: " + py + "%' aria-valuenow='" + py + "' aria-valuemin='0' aria-valuemax='100'>" + py.toFixed(2) + "%</div>" +
+                       "<div class='progress-bar loss' role='progressbar' style='width: " + pz + "%' aria-valuenow='" + pz + "' aria-valuemin='0' aria-valuemax='100'>" + pz.toFixed(2) + "%</div>";
+            }
+
+            function rps(x, y, z) {
+                var total = parseInt(x) + parseInt(y) + parseInt(z);
+                var px = x * 100 / total;
+                var py = y / total * 100;
+                var pz = z / total * 100;
+                return "<div class='progress-bar rock-btn' role='progressbar' style='width: " + px + "%' aria-valuenow='" + px + "' aria-valuemin='0' aria-valuemax='100'>" + px.toFixed(2) + "%</div>" +
+                       "<div class='progress-bar paper-btn' role='progressbar' style='width: " + py + "%' aria-valuenow='" + py + "' aria-valuemin='0' aria-valuemax='100'>" + py.toFixed(2) + "%</div>" +
+                       "<div class='progress-bar scissor-btn' role='progressbar' style='width: " + pz + "%' aria-valuenow='" + pz + "' aria-valuemin='0' aria-valuemax='100'>" + pz.toFixed(2) + "%</div>";
+            }
+
+            function checkUsername() {
+                $.get("?command=checkUsername&username=" + $("#usernameField").val(), function(data) {
+                    var result = JSON.parse(data).result;
+                    if(result) {
+                        $("#notPresent").html("<br><div class='alert alert-danger text-center' role='alert'>User does not exist</div>");
+                        $("#submitButton").prop("disabled", true);
+                    }
+                    else {
+                        $("#notPresent").html("");
+                        $("#submitButton").prop("disabled", false);
+                    }
+                    if($("#usernameField").val() == "") {
+                        $("#notPresent").html("");
+                        $("#submitButton").prop("disabled", true);
+                    }
+                });
+            }
+        </script>
     </head>
     <body>
         <!--Navbar stuff-->
@@ -22,82 +126,29 @@
 
         <div class="main-container">
             <div class="centered-container-flex">
-                <h1><?=$username?>'s Stats</h1>
-                <div class="usage-per">
-                    <?php
-                        if($total > 0) {
-                            echo '
-                            <h3><span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: #ef0000">Loss</span> Percentage</h3>
-                            <div class="progress">
-                                <div class="progress-bar win" role="progressbar" style="width: ' . $pWin . '%" aria-valuenow="' . $pWin .'" aria-valuemin="0" aria-valuemax="100">' . $pWin . '%</div>
-                                <div class="progress-bar tie" role="progressbar" style="width: ' . $pTie . '%" aria-valuenow="' . $pTie . '" aria-valuemin="0" aria-valuemax="100">' . $pTie . '%</div>
-                                <div class="progress-bar loss" role="progressbar" style="width: ' . $pLoss .'%" aria-valuenow="' . $pLoss .'" aria-valuemin="0" aria-valuemax="100">' . $pLoss .'%</div>
-                            </div>
-                            <h3><span style="color: #be5847">Rock</span>-<span style="color: #ff5599">Paper</span>-<span style="color: #92705f">Scissor</span> Usage</h3>
-                            <div class="progress">
-                                <div class="progress-bar rock-btn" role="progressbar" style="width: ' . $pRock . '%" aria-valuenow="' . $pRock .'" aria-valuemin="0" aria-valuemax="100">' . $pRock . '%</div>
-                                <div class="progress-bar paper-btn" role="progressbar" style="width: ' . $pPaper . '%" aria-valuenow="' . $pPaper . '" aria-valuemin="0" aria-valuemax="100">' . $pPaper . '%</div>
-                                <div class="progress-bar scissor-btn" role="progressbar" style="width: ' . $pScissors .'%" aria-valuenow="' . $pScissors .'" aria-valuemin="0" aria-valuemax="100">' . $pScissors .'%</div>
-                            </div>
-                            ';
-                        }
-                        else {
-                            echo "<h3>You have not played a game yet</h3>";
-                        }
-                    ?>
-                </div>
-                <div class="wl-per">
-                    <?php
-                        if($userProfile["numRock"] > 0) {
-                            echo '
-                            <h3><span style="color: #be5847">Rock</span> <span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: red">Loss</span> Percentage</h3>
-                            <div id="rock-wr" class="progress">
-                                <div class="progress-bar win" role="progressbar" style="width: ' . $pRockWin .'%" aria-valuenow="' . $pRockWin .'" aria-valuemin="0" aria-valuemax="100">' . $pRockWin .'%</div>
-                                <div class="progress-bar tie" role="progressbar" style="width: ' . $pRockTie .'%" aria-valuenow="' . $pRockTie .'" aria-valuemin="0" aria-valuemax="100">' . $pRockTie .'%</div>
-                                <div class="progress-bar loss" role="progressbar" style="width: ' . $pRockLoss .'%" aria-valuenow="' . $pRockLoss .'" aria-valuemin="0" aria-valuemax="100">' . $pRockLoss .'%</div>
-                            </div>
-                            ';
-                        }
-                        else {
-                            echo "<h3>You have not played rock in a game yet</h3>";
-                        }
-                    ?>
-                    <?php
-                        if($userProfile["numPaper"] > 0) {
-                            echo '
-                            <h3><span style="color: #ff5599">Paper</span> <span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: red">Loss</span> Percentage</h3>
-                            <div id="paper-wr" class="progress">
-                                <div class="progress-bar win" role="progressbar" style="width: ' . $pPaperWin .'%" aria-valuenow="' . $pPaperWin .'" aria-valuemin="0" aria-valuemax="100">' . $pPaperWin .'%</div>
-                                <div class="progress-bar tie" role="progressbar" style="width: ' . $pPaperTie .'%" aria-valuenow="' . $pPaperTie .'" aria-valuemin="0" aria-valuemax="100">' . $pPaperTie .'%</div>
-                                <div class="progress-bar loss" role="progressbar" style="width: ' . $pPaperLoss .'%" aria-valuenow="' . $pPaperLoss .'" aria-valuemin="0" aria-valuemax="100">' . $pPaperLoss .'%</div>
-                            </div>
-                            ';
-                        }
-                        else {
-                            echo "<h3>You have not played paper in a game yet</h3>";
-                        }
-                    ?>
-                    <?php
-                        if($userProfile["numScissors"] > 0) {
-                            echo '
-                            <h3><span style="color: #92705f">Scissor</span> <span style="color: #0b8b0b">Win</span>-<span style="color: #59e6ff">Tie</span>-<span style="color: red">Loss</span> Percentage</h3>
-                            <div id="scissor-wr" class="progress">
-                                <div class="progress-bar win" role="progressbar" style="width: ' . $pScissorsWin .'%" aria-valuenow="' . $pScissorsWin .'" aria-valuemin="0" aria-valuemax="100">' . $pScissorsWin .'%</div>
-                                <div class="progress-bar tie" role="progressbar" style="width: ' . $pScissorsTie .'%" aria-valuenow="' . $pScissorsTie .'" aria-valuemin="0" aria-valuemax="100">' . $pScissorsTie .'%</div>
-                                <div class="progress-bar loss" role="progressbar" style="width: ' . $pScissorsLoss .'%" aria-valuenow="' . $pScissorsLoss .'" aria-valuemin="0" aria-valuemax="100">' . $pScissorsLoss .'%</div>
-                            </div>
-                            ';
-                        }
-                        else {
-                            echo "<h3>You have not played scissors in a game yet</h3>";
-                        }
-                    ?>
+                <h1 id="usernameDisplay"></h1>
+                <div id="usage-per" class="usage-per"></div>
+                <h3 id="noGame">User has not played a game yet</h3>
+                <div id="wl-per" class="wl-per">
+                    <div id="rock"></div>
+                    <h3 id="noRock">User has not played rock in a game yet</h3>
+                    <div id="paper"></div>
+                    <h3 id="noPaper">User has not played paper in a game yet</h3>
+                    <div id="scissors"></div>
+                    <h3 id="noScissors">User has not played scissors in a game yet</h3>
                 </div>
             </div>
 
             <div class="centered-container-flex">
+                <form id="usernameForm">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Username" autofocus id="usernameField" name="usernameField">        
+                        <input type="button" class="btn btn-lg" value="Submit" onclick="showNewStats();" id="submitButton" disabled>
+                    </div>
+                    <div id="notPresent"></div>
+                </form>
                 <a href="?command=global" class="btn btn-lg" style="margin-top: 3vh;">Global Stats</a>
-                <a href="?command=dump_stats" class="btn btn-lg" style="margin-top: 3vh;">JSON of your Stats</a>
+                <br><br>
             </div>
         </div>
 
