@@ -39,7 +39,16 @@ class RPSController {
                 $this->createUser();
                 break;
             case "play":
-                $this->playGame();
+                $this->showQueue();
+                break;
+            case "enqueue":
+                $this->enqueue();
+                break;
+            case "dequeue":
+                $this->dequeue();
+                break;
+            case "shoot":
+                $this->shoot();
                 break;
             case "logout":
                 $this->logout();
@@ -57,6 +66,27 @@ class RPSController {
                 $this->showHomePage();
                 break;
         }
+    }
+
+    public function showQueue() {
+        include($this->PATHSTRING . "queue.php");
+    }
+
+    public function enqueue() {
+        $username = (isset($_SESSION['signed_in'])) ? $_SESSION["username"] : "Guest";
+        $_SESSION["user_match_id"] = $this->db->enqueuePlayer($username);
+        $opponent = $this->db->getFirstAvailablePlayer($_SESSION["user_match_id"]);
+        while(!$opponent) {
+            $opponent = $this->db->getFirstAvailablePlayer($_SESSION["user_match_id"]);
+        }
+        $_SESSION["opponent"] = $opponent;
+        $this->db->dequeuePlayer($_SESSION["user_match_id"]);
+        echo json_encode($opponent, JSON_PRETTY_PRINT);
+    }
+
+    public function dequeue() {
+        $this->db->dequeuePlayer($_SESSION["user_match_id"]);
+        echo json_encode(true, JSON_PRETTY_PRINT);
     }
 
     public function showHomePage($message = '') {
@@ -102,58 +132,110 @@ class RPSController {
         }
     }
 
-    public function playGame() {
-        if (isset($_POST["game_move"]) and !isset($_SESSION["move_was_submitted"])) {
-            $this->gameLogic();
-            unset($_POST["game_move"]);
-            $_SESSION["move_was_submitted"] = true;
+    public function shoot() {
+        $username = (isset($_SESSION['signed_in'])) ? $_SESSION["username"] : "Guest";
+        $userMove = str_replace([' '], '', $_GET["move"]);
+        $this->db->createMoveTable($_SESSION["user_match_id"], $userMove);
+        if ($userMove == "forfeit") {
+            echo json_encode(["result" => "loss", "usermove" => $userMove, "oppmove" => "unknown"], JSON_PRETTY_PRINT);
+            $this->db->loseByDefault($_SESSION["username"]);
             return;
         }
-        else if (isset($_POST["game_move"])) {
-            include($this->PATHSTRING . "results.php");
+        $opponentMove = $this->db->getMoveEntry($_SESSION["opponent"]["id"]);
+        while (!$opponentMove) {
+            $opponentMove = $this->db->getMoveEntry($_SESSION["opponent"]["id"]);
         }
-        else {
-            include($this->PATHSTRING . "game.php");
-            unset($_SESSION["move_was_submitted"]);
+        $opponentMove = str_replace([' '], '', $opponentMove);
+        if ($opponentMove == "forfeit") {
+            echo json_encode(["result" => "win", "usermove" => $_GET["move"], "oppmove" => $opponentMove], JSON_PRETTY_PRINT);
+            $this->db->winByDefault($_SESSION["username"]);
+            return;
+        }
+        $gameResult = $this->gameLogic($_GET["move"], $opponentMove);
+        $this->inputResultIntoDB($userMove, $gameResult, $username);
+        echo json_encode(["result" => $gameResult, "usermove" => $_GET["move"], "oppmove" => $opponentMove], JSON_PRETTY_PRINT);
+    }
+
+    public function gameLogic($userMove, $opponentMove) {
+        if ($userMove == $opponentMove) {
+            return "tie";
+        } elseif (
+            ($userMove == "rock" && $opponentMove == "scissors") ||
+            ($userMove == "paper" && $opponentMove == "rock") ||
+            ($userMove == "scissors" && $opponentMove == "paper")
+        ) {
+            return "win";
+        } elseif (
+            ($userMove == "scissors" && $opponentMove == "rock") ||
+            ($userMove == "rock" && $opponentMove == "paper") ||
+            ($userMove == "paper" && $opponentMove == "scissors")
+        ) {
+            return "loss";
+        }
+        return "error";
+    }
+
+    public function inputResultIntoDB($usermove, $gameResult, $username) {
+        switch($usermove) {
+            case "rock":
+                $this->handleRock($gameResult, $username);
+                break;
+            case "paper":
+                $this->handlePaper($gameResult, $username);
+                break;
+            case "scissors":
+                $this->handleScissors($gameResult, $username);
+                break;
+        }          
+    }
+
+    public function handleRock($gameResult, $username) {
+        switch($gameResult) {
+            case "win":
+                $this->db->rockWin($username);
+                break;
+            case "loss":
+                $this->db->rockLoss($username);
+                break;
+            case "tie":
+                $this->db->rockTie($username);
+                break;
         }
     }
 
-    public function gameLogic() {
-        $username = $_SESSION["username"];
-        $move = $_POST["game_move"];
-        if ($move == "forfeit") {
-            $this->db->query("update users set numloss = numloss + 1 where username = $1;", $username);
-            $_SESSION["displayed_match_result"] = "Forfeited the Match";
-            include($this->PATHSTRING . "results.php");
-            return;
+    public function handlePaper($gameResult, $username) {
+        switch($gameResult) {
+            case "win":
+                $this->db->paperWin($username);
+                break;
+            case "loss":
+                $this->db->paperLoss($username);
+                break;
+            case "tie":
+                $this->db->paperTie($username);
+                break;
         }
-        $temp_game_outcome = rand(1, 100);
-        switch($temp_game_outcome) {
-            case $temp_game_outcome < 33.33:
-                $this->db->query("update users set numwin = numwin + 1 where username = $1;", $username);
-                $this->db->query("update users set num" . $move . " = num" . $move . " + 1 where username = $1;", $username);
-                $this->db->query("update users set num" . $move . "win = num" . $move . "win + 1 where username = $1;", $username);
-                $_SESSION["displayed_match_result"] = "Win";
+    }
+
+    public function handleScissors($gameResult, $username) {
+        switch($gameResult) {
+            case "win":
+                $this->db->scissorsWin($username);
                 break;
-            case $temp_game_outcome < 66.66:
-                $this->db->query("update users set numloss = numloss + 1 where username = $1;", $username);
-                $this->db->query("update users set num" . $move . " = num" . $move . " + 1 where username = $1;", $username);
-                $this->db->query("update users set num" . $move . "loss = num" . $move . "loss + 1 where username = $1;", $username);
-                $_SESSION["displayed_match_result"] = "Lose";
+            case "loss":
+                $this->db->scissorsLoss($username);
                 break;
-            case $temp_game_outcome >= 66.66:
-                $this->db->query("update users set numtie = numtie + 1 where username = $1;", $username);
-                $this->db->query("update users set num" . $move . " = num" . $move . " + 1 where username = $1;", $username);
-                $this->db->query("update users set num" . $move . "tie = num" . $move . "tie + 1 where username = $1;", $username);
-                $_SESSION["displayed_match_result"] = "Tied";
+            case "tie":
+                $this->db->scissorsTie($username);
                 break;
-            }
-        include($this->PATHSTRING . "results.php");
+        }
     }
 
     public function dumpUserStats() {
         echo json_encode($this->db->getUserStats($_SESSION["username"]), JSON_PRETTY_PRINT);
-        // $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this latet
+        // echo json_encode($this->db->query("SELECT * FROM matchmaking"), JSON_PRETTY_PRINT);
+        // $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this later
+        // $this->db->query("DROP TABLE matchmaking");
     }
 
     public function login() {

@@ -33,6 +33,11 @@ class Database {
             numScissorsWin INTEGER DEFAULT 0,
             numScissorsTie INTEGER DEFAULT 0,
             numScissorsLoss INTEGER DEFAULT 0
+            );',
+            "INSERT INTO users (username) VALUES ('Guest') ON CONFLICT (username) DO NOTHING;",
+            'CREATE TABLE IF NOT EXISTS matchmaking (
+            id SERIAL PRIMARY KEY,
+            username TEXT NOT NULL
             );'];
         
         foreach ($sqlList as $query) {
@@ -117,5 +122,150 @@ class Database {
         'numRockWin' => $numRockWin, 'numRockLoss' => $numRockLoss, 'numRockTie' => $numRockTie, 'numPaper' => $numPaper, 'numPaperWin' => $numPaperWin, 
         'numPaperLoss' => $numPaperLoss, 'numPaperTie' => $numPaperTie, 'numScissors' => $numScissors, 'numScissorsWin' => $numScissorsWin, 
         'numScissorsLoss' => $numScissorsLoss, 'numScissorsTie' => $numScissorsTie);
+    }
+
+    public function enqueuePlayer($username) {
+        $res = $this->query("INSERT INTO matchmaking (username) VALUES ($1) RETURNING id;", $username);
+        if (!$res) return false;
+        return $res[0]["id"];
+    }
+
+    public function dequeuePlayer($primaryKey) {
+        $this->query("DELETE FROM matchmaking WHERE id = ($1);", $primaryKey);
+    }
+
+    public function createMoveTable($id, $move) {
+        $tableName = "move_" . $id;
+        $tableQuery = "CREATE TABLE IF NOT EXISTS $tableName (move TEXT PRIMARY KEY)";
+    
+        // Insert data query
+        $insertQuery = "INSERT INTO $tableName(move) VALUES (' " . $move . " ')";
+        
+        // Execute the queries
+        $tableRes = $this->query($tableQuery);
+        $insertRes = $this->query($insertQuery);
+    
+        // Check for errors
+        if (!$tableRes) return "Failed to create table";
+        if (!$insertRes) return "Failed to insert move";
+    
+        return true;
+    }
+    
+
+    public function getMoveEntry($id) {
+        $tableName = "move_" . $id;
+    
+        // Check if the table exists
+        $tableExists = $this->tableExists($tableName);
+        if (!$tableExists) {
+            return false;
+        }
+    
+        // If the table exists, proceed with fetching the move entry
+        $getRes = $this->query("SELECT * FROM $tableName;");
+        if (!$getRes) {
+            return false;
+        }
+    
+        // Drop the table after fetching the move entry
+        $this->query("DROP TABLE IF EXISTS $tableName;");
+    
+        return $getRes[0]["move"];
+    }
+    
+    // Helper function to check if a table exists
+    private function tableExists($tableName) {
+        $checkRes = $this->query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1);", $tableName);
+        return $checkRes[0]['exists'] === 't';
+    }
+    
+
+    public function deleteMoveTable($id) {
+        $tableName = "move_" . $id;
+        $this->query("DROP TABLE IF EXISTS ($1)", $tableName);
+    }
+
+    public function getFirstAvailablePlayer($id) {
+        $res = $this->query('SELECT *
+        FROM matchmaking
+        WHERE id <> ($1)
+        ORDER BY id
+        LIMIT 1;', $id);
+        if (empty($res)) return false;
+        return $res[0];
+    }
+
+    public function rockWin($username) {
+        $this->query("UPDATE users SET 
+        numWin = numWin + 1,
+        numRock = numRock + 1, 
+        numRockWin = numRockWin + 1 WHERE username = ($1);", $username);
+    }
+
+    public function rockTie($username) {
+        $this->query("UPDATE users SET 
+        numTie = numTie + 1,
+        numRock = numRock + 1, 
+        numRockTie = numRockTie + 1 WHERE username = ($1);", $username);
+    }
+
+    public function rockLoss($username) {
+        $this->query("UPDATE users SET 
+        numLoss = numLoss + 1,
+        numRock = numRock + 1, 
+        numRockLoss = numRockLoss + 1 WHERE username = ($1);", $username);
+    }
+
+    public function paperWin($username) {
+        $this->query("UPDATE users SET 
+        numWin = numWin + 1,
+        numPaper = numPaper + 1, 
+        numPaperWin = numPaperWin + 1 WHERE username = ($1);", $username);
+    }
+
+    public function paperTie($username) {
+        $this->query("UPDATE users SET 
+        numTie = numTie + 1,
+        numPaper = numPaper + 1, 
+        numPaperTie = numPaperTie + 1 WHERE username = ($1);", $username);
+    }
+
+    public function paperLoss($username) {
+        $this->query("UPDATE users SET 
+        numLoss = numLoss + 1,
+        numPaper = numPaper + 1, 
+        numPaperLoss = numPaperLoss + 1 WHERE username = ($1);", $username);
+    }
+
+    public function scissorsWin($username) {
+        $this->query("UPDATE users SET 
+        numWin = numWin + 1,
+        numScissors = numScissors + 1, 
+        numScissorsWin = numScissorsWin + 1 WHERE username = ($1);", $username);
+    }
+
+    public function scissorsTie($username) {
+        $this->query("UPDATE users SET 
+        numTie = numTie + 1,
+        numScissors = numScissors + 1, 
+        numScissorsTie = numScissorsTie + 1 WHERE username = ($1);", $username);
+    }
+
+    public function scissorsLoss($username) {
+        $this->query("UPDATE users SET 
+        numLoss = numLoss + 1,
+        numScissors = numScissors + 1, 
+        numScissorsLoss = numScissorsLoss + 1 WHERE username = ($1);", $username);
+    }
+
+    public function loseByDefault($username) {
+        $this->query("UPDATE users SET
+        numLoss = numLoss + 1 WHERE username = ($1)", $username);
+    }
+
+    public function winByDefault($username) {
+        $this->query("UPDATE users SET
+        numWin = numWin + 1 WHERE username = ($1)", $username);
     }
 }
