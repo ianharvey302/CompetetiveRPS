@@ -4,10 +4,24 @@ let opponentJSON = null;
 let matchResultString = false;
 let enqueueAjax;
 let gameAjax;
+let timerInterval;
+const MATCH_TIME = 10;
+let countdown = MATCH_TIME;
+
+function updateTimer() {
+    $('#timer').text('Select Your Move (' + countdown + 's left):');
+    countdown--;
+
+    if (countdown < 0) {
+        clearInterval(timerInterval);
+        countdown = MATCH_TIME;
+        handleForfeitButtonClick();
+    }
+}
+
 
 $(document).ready(function() {
     enqueueAjax = $.get("?command=enqueue", handleEnqueueAjax);
-
     // $(window).on("beforeunload", function() {
     //     enqueueAjax.abort();
     //     navigator.sendBeacon("?command=dequeue", "");
@@ -26,6 +40,9 @@ function handleMoveButtonClick() {
 }
 
 function handleLockButtonClick() {
+    clearInterval(timerInterval);
+    countdown = MATCH_TIME;
+    $('#timer').text('Waiting for Opponent Selection...');
     $(".move-btn, .lock-btn, .forfeit-btn").prop("disabled", true);
     $(this).css("background-color", "#dc3545");
 
@@ -46,8 +63,9 @@ function handleLockButtonClick() {
         }
         loadResultsScreen(matchResultString);
         $("#new-game").on("click", function() {
-            loadQueueScreen();
-            enqueueAjax = $.get("?command=enqueue", handleEnqueueAjax);
+            location.reload();
+            // loadQueueScreen();
+            // enqueueAjax = $.get("?command=enqueue", handleEnqueueAjax);
         });
     });
 }
@@ -55,6 +73,11 @@ function handleLockButtonClick() {
 function handleForfeitButtonClick() {
     navigator.sendBeacon("?command=shoot&move=forfeit", "");
     loadResultsScreen("Lose");
+    $("#new-game").on("click", function() {
+        location.reload();
+        // loadQueueScreen();
+        // enqueueAjax = $.get("?command=enqueue", handleEnqueueAjax);
+    });
 }
 
 function handleEnqueueAjax(data) {
@@ -67,7 +90,7 @@ function handleEnqueueAjax(data) {
     $(".match-moves > .move-btn").on("click", handleMoveButtonClick);
     $(".lock-btn").on("click", handleLockButtonClick);
     $(".forfeit-btn").on("click", handleForfeitButtonClick);
-
+    timerInterval = setInterval(updateTimer, 1000);
 }
 
 function loadQueueScreen() {
@@ -85,7 +108,7 @@ function loadGameScreen() {
     $("#game-container").html(
         '<div class="match-text">' +
         '<h1>Opponent: <strong>' + opponentName + '</strong></h1>' +
-        '<h3>Select Your Move (10s left):</h3>' +
+        '<h3 id="timer">Select Your Move (10s left):</h3>' +
         '</div>' +
         '<div class="flexform centered-container-flex">' +
         '<div class="match-moves" role="group" aria-label="Moves">' +

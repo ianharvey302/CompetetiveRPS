@@ -183,7 +183,7 @@ class RPSController {
             case "paper":
                 $this->handlePaper($gameResult, $username);
                 break;
-            case "scissor":
+            case "scissors":
                 $this->handleScissors($gameResult, $username);
                 break;
         }          
@@ -234,8 +234,8 @@ class RPSController {
     public function dumpUserStats() {
         echo json_encode($this->db->getUserStats($_SESSION["username"]), JSON_PRETTY_PRINT);
         // echo json_encode($this->db->query("SELECT * FROM matchmaking"), JSON_PRETTY_PRINT);
-        $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this later
-        $this->db->query("DROP TABLE matchmaking");
+        // $this->db->query("DROP TABLE users"); //Quick way to drop user table for development get rid of this later
+        // $this->db->query("DROP TABLE matchmaking");
     }
 
     public function login() {
